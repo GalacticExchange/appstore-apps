@@ -1,0 +1,12 @@
+{
+  "base": {
+    "container_name": "gex_zoomdata_build",
+    "base_image_1": "zoomdata/quickstart",
+    "base_image": "gex_zoomdata",
+    "base_image_tag_1": "latest",
+    "base_image_tag": "0.6.1"
+  },
+  "zoomdata": {
+    "op1": "gex.com"
+  }
+}

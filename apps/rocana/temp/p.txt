@@ -1,0 +1,22 @@
+USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root         1  0.0  0.1  36732  4872 ?        Ss   15:29   0:00 /lib/systemd/systemd 
+root        26  0.0  0.0  35260  4160 ?        Ss   15:29   0:00 /lib/systemd/systemd-journald
+rocana      28  2.5  9.2 2163168 440260 ?      Ssl  15:29   0:38 /usr/lib/jvm/java-7-oracle-amd64/bin/java -Drocana.app=rocana-webapp -Drocana.home=/opt/rocana/rocana-1.4.2 -Drocana.conf.dir=/opt/rocana/rocana-1.4.2/conf -Drocana.app.conf.dir=/opt/rocana/rocana-1.4.2/conf/rocana-webapp -Drocana.lib.dir=/opt/rocana/rocana-1.4.2/lib -Drocana.app.lib.dir=/opt/rocana/rocana-1.4.2/lib/rocana-webapp -Djava.net.preferIPv4Stack=true -Djava.util.logging.config.file=/opt/rocana/rocana-1.4.2/conf/parquet-logging.properties -cp /opt/rocana/rocana-1.4.2/conf/rocana-webapp:/opt/rocana/rocana-1.4.2/conf:/opt/rocana/rocana-1.4.2/lib/rocana-webapp/*:/opt/rocana/rocana-1.4.2/lib/* com.rocana.web.WebApp
+rocana      30  0.3  1.9 1994456 93632 ?       Ssl  15:29   0:04 /usr/lib/jvm/java-7-oracle-amd64/bin/java -Drocana.app=rocana-solr-consumer -Drocana.home=/opt/rocana/rocana-1.4.2 -Drocana.conf.dir=/opt/rocana/rocana-1.4.2/conf -Drocana.app.conf.dir=/opt/rocana/rocana-1.4.2/conf/rocana-solr -Drocana.lib.dir=/opt/rocana/rocana-1.4.2/lib -Drocana.app.lib.dir=/opt/rocana/rocana-1.4.2/lib/rocana-solr -Djava.net.preferIPv4Stack=true -cp /opt/rocana/rocana-1.4.2/conf/rocana-solr:/opt/rocana/rocana-1.4.2/conf:/opt/rocana/rocana-1.4.2/lib/rocana-solr/*:/opt/rocana/rocana-1.4.2/lib/* com.rocana.consumer.solr.SolrConsumerApp
+rocana      32  0.3  1.9 1996240 93688 ?       Ssl  15:29   0:04
+/usr/lib/jvm/java-7-oracle-amd64/bin/java -Drocana.app=rocana-hdfs-consumer
+-Drocana.home=/opt/rocana/rocana-1.4.2
+-Drocana.conf.dir=/opt/rocana/rocana-1.4.2/conf
+-Drocana.app.conf.dir=/opt/rocana/rocana-1.4.2/conf/rocana-hdfs-consumer
+-Drocana.lib.dir=/opt/rocana/rocana-1.4.2/lib
+-Drocana.app.lib.dir=/opt/rocana/rocana-1.4.2/lib/rocana-hdfs-consumer
+-Djava.net.preferIPv4Stack=true
+-Djava.util.logging.config.file=/opt/rocana/rocana-1.4.2/conf/parquet-logging.properties
+-cp /opt/rocana/rocana-1.4.2/conf/rocana-hdfs-consumer:/opt/rocana/rocana-1.4.2/conf:/opt/rocana/rocana-1.4.2/lib/rocana-hdfs-consumer/*:/opt/rocana/rocana-1.4.2/lib/* com.rocana.consumer.hdfs.HdfsConsumerApp
+
+root       168  0.0  0.0  18192  3176 ?        Ss   15:29   0:00 /bin/bash
+root       273  0.0  0.0  18188  3328 ?        Ss   15:32   0:00 /bin/bash
+root       281  0.0  0.0  44888  2936 ?        S    15:33   0:00 su - rocana
+rocana     282  0.0  0.0  18212  3408 ?        S+   15:33   0:00 -su
+rocana     288  0.1  0.7 340932 36012 ?        Sl   15:33   0:01 /opt/rocana/rocana-1.4.2/lib/rocana-agent/rocana-agent /opt/rocana/rocana-1.4.2/conf/rocana-agent
+root       439  0.0  0.0  15596  2172 ?        R+   15:54   0:00 ps aux

@@ -1,0 +1,96 @@
+{
+  "namespace": "com.rocana.event",
+  "name": "FlattenedSyslog",
+  "type": "record",
+  "doc": "An Event of type syslog with attributes flattened",
+  "fields": [
+    {
+      "name": "ts",
+      "type": "long",
+      "doc": "Epoch timestamp in nanos."
+    },
+    {
+      "name": "event_type_id",
+      "type": "int",
+      "doc": "ID indicating the type of event."
+    },
+    {
+      "name": "source",
+      "type": [ "null", "string" ],
+      "doc": "Event source in the form of location:host:service_group:service.",
+      "default": null
+    },
+    {
+      "name": "location",
+      "type": [ "null", "string" ],
+      "doc": "Event location.",
+      "default": null
+    },
+    {
+      "name": "host",
+      "type": [ "null", "string" ],
+      "doc": "Event host.",
+      "default": null
+    },
+    {
+      "name": "service",
+      "type": [ "null", "string" ],
+      "doc": "Event service.",
+      "default": null
+    },
+    {
+      "name": "body",
+      "type": [ "null", "bytes" ],
+      "doc": "Raw event content in bytes.",
+      "default": null
+    },
+    {
+      "name": "syslog_facility",
+      "type": [ "null", "int" ],
+      "doc": "numeric syslog facility value",
+      "default": null
+    },
+    {
+      "name": "syslog_severity",
+      "type": [ "null", "int" ],
+      "doc": "numeric syslog severity value",
+      "default": null
+    },
+    {
+      "name": "syslog_hostname",
+      "type": [ "null", "string" ],
+      "doc": "hostname where message was generated",
+      "default": null
+    },
+    {
+      "name": "syslog_message",
+      "type": [ "null", "string" ],
+      "doc": "text component of message",
+      "default": null
+    },
+    {
+      "name": "syslog_pid",
+      "type": [ "null", "int" ],
+      "doc": "id of process that generated the message",
+      "default": null
+    },
+    {
+      "name": "syslog_process",
+      "type": [ "null", "string" ],
+      "doc": "name of process that generated the message",
+      "default": null
+    },
+    {
+      "name": "syslog_ts",
+      "type": [ "null", "long" ],
+      "doc": "Epoch timestamp in milli that was found in the message",
+      "default": null
+    },
+    {
+      "name": "parent_id",
+      "type": [ "null", "string" ],
+      "doc": "id of event this event was generated from",
+      "default": null
+    }
+  ]
+}

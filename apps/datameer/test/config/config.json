@@ -1,0 +1,31 @@
+{
+  "master":{
+    "host": "quickstart.cloudera",
+    "ip": "51.1.0.221",
+    "ssh": {
+      "user": "cloudera",
+      "password": "cloudera"
+    }
+  },
+  "zookeeper": {
+    "url": "quickstart.cloudera:2181",
+    "host": "quickstart.cloudera",
+    "port": "2181"
+  },
+  "hdfs": {
+    "url": "quickstart.cloudera:8020",
+    "host": "quickstart.cloudera",
+    "port": "8020"
+  },
+
+  "datameer": {
+    "user": "root",
+    "db_name":"",
+    "deploy_mode":"trial",
+    "max_available_mem":"1024m",
+    "max_http_header_size":"8192",
+    "memory_gc_profiling":"no",
+    "log_rotation":"no"
+  }
+
+}

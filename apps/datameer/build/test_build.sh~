@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+#set -e
+
+docker stop $(docker ps -a -q)
+docker rm $(docker ps -a -q)
+docker rmi zoomdata
+
+./destroy.sh
+./build.sh
+
+docker run -d --name=zoomdata --privileged=true zoomdata
+docker exec -ti zoomdata /bin/bash
+
+

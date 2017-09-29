@@ -1,0 +1,57 @@
+{
+  "namespace": "com.rocana.event",
+  "name": "SyslogRollup",
+  "type": "record",
+  "doc": "Aggretion of Syslog Records",
+  "fields": [
+    {
+      "name": "ts",
+      "type": "long",
+      "doc": "Epoch timestamp in nanos."
+    },
+    {
+      "name": "windowSizeMS",
+      "type": "long",
+      "doc": "Size of the window this roll up covers in milliseconds"
+    },
+    {
+      "name": "kafka_topic",
+      "type": "string",
+      "doc": "Name of topic that produced this batch"
+    },
+    {
+      "name": "kafka_partition",
+      "type": "long",
+      "doc": "Name of partition that produced this batch"
+    },
+    {
+      "name": "kafka_offset",
+      "type": "long",
+      "doc": "Max offset seen for this topic/partition in the batch that produced this record"
+    },
+    {
+      "name": "severity",
+      "type": "int",
+      "doc": "numeric syslog severity value",
+      "default": null
+    },
+    {
+      "name": "host",
+      "type": "string",
+      "doc": "hostname where message was generated",
+      "default": null
+    },
+    {
+      "name": "num_msgs",
+      "type": "long",
+      "doc": "Number of messages observed across dimensions",
+      "default": null
+    },
+    {
+      "name": "total_request_size",
+      "type": "long",
+      "doc": "Sum across dimensions of request_size attr that we made up for this exercise",
+      "default": null
+    }
+  ]
+}

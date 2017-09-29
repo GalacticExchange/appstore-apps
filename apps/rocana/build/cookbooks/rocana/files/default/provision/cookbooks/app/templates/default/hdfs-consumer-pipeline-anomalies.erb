@@ -1,0 +1,12 @@
+pipeline.anomalies.kafka.zookeeper.quorum = <%=@node['zookeeper']['url']%>
+pipeline.anomalies.topic = events
+pipeline.anomalies.repo = repo:hive://<%=@node['hive']['host']%>:<%=@node['hive']['port']%>/datasets/rocana?hdfs-host=<%=@node['hdfs']['host']%>&hdfs-port=<%=@node['hdfs']['port']%>
+pipeline.anomalies.dataset = <%= node['rocana']['impala_anomalies_table']%>
+pipeline.anomalies.consumer.group.id = anomalies-hdfs-consumer
+pipeline.anomalies.threads = 1
+pipeline.anomalies.key.cache.size = 0
+pipeline.anomalies.writer.commit-time-ms = 60000
+pipeline.anomalies.writer.batch-time-ms = 60000
+pipeline.anomalies.dead-letter.mode = drop
+
+pipeline.anomalies.transformer.class = com.rocana.consumer.analytics.anomaly.AnomalyTransformer

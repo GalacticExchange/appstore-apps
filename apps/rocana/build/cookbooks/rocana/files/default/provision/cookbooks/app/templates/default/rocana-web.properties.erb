@@ -1,0 +1,419 @@
+#
+# Copyright (c) 2015 Rocana. All rights reserved.
+#
+# This is a sample Rocana-Webapp configuration file. For the full documentation,
+# see the Rocana Reference Guide.
+###################################################################################################
+# Name: jdbc.url
+# Required: Yes
+#
+# The web application requires an empty PostgreSQL 8+ database. The jdbc.url specifies
+# which database to connect to. This database must be setup prior to starting the webapp.
+# It will then be populated during initial webapp startup.
+#
+# Ex.
+jdbc.url = jdbc:postgresql://localhost/rocana
+
+###################################################################################################
+# Name: jdbc.user
+# Required: Yes
+#
+# The user name to connect to the database with. This user must have privileges
+# to create tables within the database.
+#
+# Ex.
+jdbc.user = <%=@node['rocana']['postgresql']['user'] %>
+
+###################################################################################################
+# Name: jdbc.password
+# Required: Yes
+#
+# The password to connect to the database with.
+#
+# Ex.
+jdbc.password = <%=@node['rocana']['postgresql']['password'] %>
+
+###################################################################################################
+# Name: impala.host
+# Required: Yes
+#
+# The host that will be used to query Impala for metric data.
+#
+# Ex.
+impala.host = <%=@node['impala']['host'] %>
+
+###################################################################################################
+# Name: impala.table
+# Required: Yes
+#
+# The table name in Impala where metric data lives.
+#
+# Ex.
+impala.table = <%=@node['rocana']['impala_metrics_table'] %>
+
+###################################################################################################
+# Name: impala.user
+# Required: No
+#
+# When using impala without Kerberos, but with Sentry, you may need to configure a username to
+# use to connect.
+#
+# Ex.
+# impala.user = rocana
+###################################################################################################
+# Name: impala.namespace
+# Required: No
+# Default: default
+#
+# The namespace in Impala where metric data lives.
+#
+# Ex.
+# impala.namespace = rocana
+###################################################################################################
+# Name: impala.anomalies.table
+# Required: Yes
+#
+# The table name in Impala where anomaly data lives.
+#
+# Ex.
+impala.anomalies.table = <%=@node['rocana']['impala_anomalies_table'] %>
+
+###################################################################################################
+# Name: impala.port
+# Required: No
+#
+# Impala SQL access port, 21050 by default.
+#
+# Ex.
+# impala.port = 21050
+###################################################################################################
+# Name: kerberos.principal
+# Required: Yes (in a kerberos environment)
+#
+# The user to connect to Impala as - kerberos.keytab must contain a key for this principal.
+#
+# Ex.
+# kerberos.principal = rocana@EXAMPLE.COM
+###################################################################################################
+# Name: kerberos.principal.keytab
+# Required: Yes (in a kerberos environment)
+#
+# The keytab to use when connecting to Impala. This must contain a key for kerberos.principal
+# and be readable by the user running the web server.
+#
+# Ex.
+# kerberos.principal.keytab = /opt/rocana/rocana.keytab
+###################################################################################################
+# Name: kerberos.impala.principal
+# Required: Yes (in a kerberos environment)
+#
+# The Kerberos principal used to start Impala on impala.host. It's not necessary to provide a keytab
+# for this principal. This principal must include the hostname, which should be impala.host. If you
+# leave the hostname set to "_HOST", it will automatically be replaced with the fully qualified
+# domain name of the Impala server.
+#
+# Ex.
+# kerberos.impala.principal = impala/_HOST@EXAMPLE.COM
+###################################################################################################
+# Name: server.use_ssl
+# Required: No
+# Default: false
+#
+# Use ssl for connections to the webapp.
+#
+# This will change the default port to 8443 instead of 8081 if server.port port isn't specified.
+#
+# Ex.
+# server.use_ssl = false
+###################################################################################################
+# Name: server.keystore
+# Required: No
+# Default: conf/rocana-webapp/keystore
+#
+# The path to a java keystore to use for keys for ssl encryption. For testing purposes there is a
+# test keystore that will be used by default if another is not specified.
+#
+# Ex.
+# server.keystore = conf/rocana-webapp/keystore
+###################################################################################################
+# Name: server.keystore_password
+# Required: No
+#
+# The password to open the specified keystore.
+#
+# Ex.
+# server.keystore_password = abcd
+###################################################################################################
+# Name: rocana.search.zookeeper.quorum
+# Required: Yes (If using Rocana Search)
+#
+# A comma separated list of <hostname>:<port> of zookeeper servers where the
+# Rocana-Search servers are registered.
+#
+# Ex.
+# rocana.search.zookeeper.quorum = cdh5-1.rocana.com:2181,cdh5-2.rocana.com:2181
+###################################################################################################
+# Name: rocana.search.dataset
+# Required: Yes (If using Rocana Search)
+#
+# Name of the dataset search queries will be run against.  Must match the
+# dataset name from the search ingest pipeline.
+#
+# Ex.
+# rocana.search.dataset = events
+###################################################################################################
+# Name: rocana.search.client-rpc.sasl.enabled
+# Required: No
+# Default = false
+#
+# Specifies whether you want the RPC traffic to rocana-search to do SASL
+# authentication using Kerberos. In a non-Kerberos environment, this setting
+# should always be false (or commented out).  In a Kerberos environment, you are
+# allowed to set it to either true or false.  When set to false (in a Kerberos
+# environment), HDFS access will use Kerberos authentication, but the RPC queries
+# to rocana-search will not.
+#
+# Ex.
+# rocana.search.client-rpc.sasl.enabled = true
+###################################################################################################
+# Name: rocana.search.jaas.module.name
+# Required: No (Yes if rocana.search.client-rpc.sasl.enabled=true)
+#
+# Specifies what module entry in the jaas-client.conf file to use when
+# authenticating SASL-RPC calls to Rocana Search.
+#
+# Ex.
+# rocana.search.jaas.module.name = Client
+###################################################################################################
+# Name: solr.zookeeper.quorum
+# Required: Yes (For solr)
+#
+# A comma separated list of <hostname>:<port> of zookeeper servers where the
+# CloudSolr servers are registered. This is generally followes by a "/solr" path after
+# the last server's port.
+#
+# Ex.
+solr.zookeeper.quorum = <%=@node['zookeeper']['url'] %>/solr
+
+###################################################################################################
+# Name: solr.core
+# Required: Yes (For solr)
+#
+# The solr core to search against.
+#
+# Ex.
+solr.core = <%=@node['rocana']['events_topic_name'] %>
+
+###################################################################################################
+# Name: solr.jaas.module.name
+# Required: Yes (For solr in a kerberos environment)
+#
+# The JAAS module configured in the jaas-client.conf file to use for Kerberos authentication
+# in a secure environment. If you are using this, you also need to uncomment the jaas conf line
+# in the conf/commands.d/rocana-webapp file.
+#
+# Ex.
+# solr.jaas.module.name = UI
+###################################################################################################
+# Name: kafka.brokers
+# Required: Yes
+#
+# For the EventIngest REST API, a comma separated list of <hostname>:<port> of kafka brokers.
+#
+# Ex.
+kafka.brokers = <%=@node['kafka']['broker'] %>
+
+###################################################################################################
+# Name: kafka.zookeeper.quorum
+# Required: Yes
+#
+# For the EventIngest REST API, A comma separate list of <hostname>:<port> of zookeeper
+# servers where the Kafka brokers are registered. It's also possible to specify an optional root
+# path in ZooKeeper after the last port. This is useful when you're using a shared
+# ZooKeeper quorum with other services.
+#
+# Ex.
+# kafka.zookeeper.quorum = cdh5-1.rocana.com:2181,cdh5-2.rocana.com:2181
+###################################################################################################
+# Name: producer.topic
+# Required: Yes
+#
+# For the EventIngest REST API, the Kafka topic to place events in.
+#
+# Ex.
+# producer.topic = events
+###################################################################################################
+# Name: producer.key.serializer.class
+# Name: producer.serializer.class
+# Required: Yes
+#
+# Advanced. If using the REST API you need to configure the format of events sent to the Kafka
+# topic. These shouldn't change unless you're using JSON encoded events instead of Avro.
+#
+# Ex.
+# producer.key.serializer.class = kafka.serializer.DefaultEncoder
+# producer.serializer.class = com.rocana.kafka.EventEncoder
+###################################################################################################
+# Name: server.port
+# Required: No
+#
+# The port the web application will listen on.
+#
+# Defaults to 8081 if SSL is not turned on and 8443 if it is.
+#
+# Ex.
+# server.port = 8081
+###################################################################################################
+# Name: server.dir
+# Required: No
+#
+# The Directory that will be used for webapp files. If the value doesn't start with a '/', then it
+# is relative to $ROCANA_HOME.
+#
+# Defaults to $ROCANA_HOME/webapps
+#
+# Ex.
+# server.dir = webapps
+###################################################################################################
+# Name: server.dump_conf
+# Required: No
+#
+# For debugging purposes, should the webapp dump the jetty config after startup.
+#
+# Defaults to false, set to true to override.
+#
+# Ex.
+# server.dump_conf = false
+###################################################################################################
+# Name: server.max_threads
+# Required: No
+#
+# For the webapp, the max number of request threads.
+#
+# Defaults to 200
+#
+# Ex.
+# server.max_threads = 200
+###################################################################################################
+# Name: server.min_threads
+# Required: No
+#
+# For the webapp, the min number of request threads.
+#
+# Defaults to 5
+#
+# Ex.
+# server.min_threads = 5
+###################################################################################################
+# Name: server.max_facets
+# Required: No
+#
+# For the webapp, maximum number of facets returned by a search
+#
+# Defaults to 100,000
+#
+# Ex.
+# server.max_facets = 100000
+###################################################################################################
+# Name: ad.domain
+# Required: No
+#
+# The Active Directory domain.
+# Needed to configure the webapp to use Active Directory for authentication.
+#
+# Ex.
+# ad.domain = rocana.com
+###################################################################################################
+# Name: ad.url
+# Required: No
+#
+# The Active Directory URL.
+# Needed to configure the webapp to use Active Directory for authentication.
+#
+# Ex.
+# ad.url = ldap://127.0.0.1/
+###################################################################################################
+# Name: ad.user.groups
+# Required: No
+#
+# Comma delimited Active Directory Groups that are allowed to log in as Users to Rocana Ops.
+# Needed to configure the webapp to use Active Directory for authentication.
+#
+# Ex.
+# ad.user.groups = rocana,rocanaOps
+###################################################################################################
+# Name: ad.admin.groups
+# Required: No
+#
+# Comma delimited Active Directory Groups that are allowed to log in as Admins to Rocana Ops.
+# Needed to configure the webapp to use Active Directory for authentication.
+#
+# Ex.
+# ad.admin.groups = rocana,rocanaAdmins
+###################################################################################################
+# Name: producer.commands.topic
+# Required: No
+#
+# For the webapp, the name of the kafka topic that the webapp will send all Agent monitoring messages to.
+#
+# Defaults to commands
+#
+# Ex.
+# producer.commands.topic = commands
+###################################################################################################
+# Name: agents.monitor.initial-delay-ms
+# Required: No
+#
+# For the webapp, the initial delay in milliseconds before it starts to monitor agents for configuration changes.
+#
+# Defaults to 300000 milliseconds
+#
+# Ex.
+# agents.monitor.initial-delay-ms = 300000
+###################################################################################################
+# Name: agents.monitor.fixed-delay-ms
+# Required: No
+#
+# For the webapp, the fixed delay in milliseconds between monitoring agents for configuration changes.
+#
+# Defaults to 300000 milliseconds
+#
+# Ex.
+# agents.monitor.fixed-delay-ms = 300000
+###################################################################################################
+# Name: keys.path
+# Required: No
+#
+# The location where the webapp will load (and if not present) generate the public / private key
+# pair used for encrypting messages. The webapp must have read access to such location.
+# It also needs to have write access if no key pair exists so it can generate one there.
+#
+# Defaults to $ROCANA_CONF_DIR/rocana-webapp/keys
+# If $ROCANA_CONF_DIR is not defined it defaults to $USER_HOME/rocana-webapp/keys
+#
+# Ex.
+# keys.path = /tmp/rocana/keys
+###################################################################################################
+# Name: agent.last-heartbeat-days
+# Required: No
+#
+# For the webapp, the number of days to filter out agents that haven't received any heartbeats
+# in that time period. Such agents will not show up in the list of agents and will not receive
+# any configuration messages. If set to empty then all agents will be shown and receive messages.
+#
+# Defaults to 14 days
+#
+# Ex.
+# agent.last-heartbeat-days = 14
+###################################################################################################
+# Name: remember-me.disabled
+# Required: No
+#
+# For the webapp, disables the "Remember me" feature that allows a user to stay logged in the application
+# between sessions.
+#
+# Defaults to false
+#
+# Ex.
+# remember-me.disabled = true
+###################################################################################################

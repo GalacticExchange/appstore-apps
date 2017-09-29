@@ -1,0 +1,85 @@
+#
+# Copyright (c) 2015 Rocana. All rights reserved.
+#
+# This is a sample HDFS Consumer configuration file. For the full documentation,
+# see the Rocana Reference Guide.
+#
+###################################################################################################
+# Name: kerberos.principal
+# Required: Yes (in a kerberos environment)
+#
+# When the consumer is run in a kerberos secured environment, you must specify an hdfs principal
+# and keytab that can be used to proxy the users specified for each pipeline.
+#
+# Ex.
+# kerberos.principal = rocana@EXAMPLE.COM
+###################################################################################################
+# Name: kerberos.principal.keytab
+# Required: Yes (in a kerberos environment)
+#
+# If running in a kerberos secured environment you need to specify the location of the keytab for the
+# superuser to authenticate with.
+#
+# Ex.
+# kerberos.principal.keytab = /opt/rocana/rocana.keytab
+###################################################################################################
+# A comma separated list of pipeline configuration names. Each pipeline
+# configuration creates one or more pipelines in the consumer based on the
+# specified number of threads. A pipeline is fully independent, with its own
+# stream from Kafka, transformation engine, and stream to HDFS.
+#
+# This property only declares the pipeline configuration name. Once declared,
+# the pipeline configuration properties must be specified. See later in this
+# file for an example.
+#
+# Name: pipeline
+# Required: Yes
+#
+# Ex. A single pipeline called events.
+
+
+pipeline = <%=@pipelines.join(", ") %>
+
+#
+# Ex. Two pipelines called events-b and events-b
+# pipeline = events-a, events-b
+
+
+<% @pipelines.each do |name| %>
+  <%=render "hdfs-consumer-pipeline-#{name}.erb" %>
+<% end %>
+
+
+
+###################################################################################################
+# Name: metrics.log-report-frequency
+# Required: Yes
+#
+# The frequency at which metrics are output to the consumer logs, in seconds. If this
+# value is 0, then there will not be any metrics output to the logs.
+#
+# Ex.
+metrics.log-report-frequency = 300
+###################################################################################################
+# Name: admin.server.bind-address
+# Required: No
+# Default: 0.0.0.0
+#
+# The IP or hostname to which the admin HTTP service should bind. If set to
+# 0.0.0.0 (wildcard), the server will bind to all available interfaces.
+#
+# Ex.
+# admin.server.bind-address = localhost
+#
+# Ex.
+# admin.server.bind-address = consumer1234.rocana.com
+###################################################################################################
+# Name: admin.server.port
+# Required: Yes
+# Default: 17310
+#
+# The port to which the admin HTTP service should bind.
+#
+# Ex.
+admin.server.port = 17310
+###################################################################################################

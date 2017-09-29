@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+export HOME=/opt/pentaho
+
+export BISERVER_TAG=5.4.0.1-130
+export PENTAHO_JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk-amd64
+export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+export PWD=/opt/pentaho
+export JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk-amd64
+export LANG=C.UTF-8
+export JAVA_VERSION=7u95
+export BISERVER_VERSION=5.4
+export SHLVL=1
+export HOME=/opt/pentaho
+export JAVA_DEBIAN_VERSION=7u95-2.6.4-1~deb8u1
+export PENTAHO_HOME=/opt/pentaho
+
+sh /opt/pentaho/scripts/run.sh

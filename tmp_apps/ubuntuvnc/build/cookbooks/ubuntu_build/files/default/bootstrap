@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+/root/scripts/vnc_startup.sh

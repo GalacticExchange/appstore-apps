@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+/opt/gex/env_setup
+while sleep 2; do echo gex; done

@@ -1,0 +1,13 @@
+#!/bin/sh
+
+command_type=sh
+
+if [ -z "$args" ]; then
+  args="$ROCANA_CONF_DIR/rocana-agent"
+fi
+
+command="$ROCANA_LIB_DIR/rocana-agent/rocana-agent"
+
+command_sh_main() {
+  exec $command $args
+}

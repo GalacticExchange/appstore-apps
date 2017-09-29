@@ -1,0 +1,5 @@
+{
+  "devapi": {"type": "ssh", "host": "51.0.12.21", "user": "vagrant", "password": "vagrant"},
+  "master": {"type": "ssh", "host": "51.1.0.221", "user": "cloudera", "password": "cloudera"},
+  "rocana": {"type": "docker", "host": "rocana", "user": "root", "password": ""}
+}

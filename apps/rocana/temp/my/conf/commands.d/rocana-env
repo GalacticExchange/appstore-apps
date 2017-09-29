@@ -1,0 +1,21 @@
+#!/bin/sh
+
+command_type=sh
+
+command_sh_main() {
+  printf "Environment:\n\n"
+
+  for varname in \
+    ROCANA_HOME \
+    ROCANA_LIB_DIR \
+    ROCANA_BIN_DIR \
+    ROCANA_CONF_DIR \
+    JAVA_HOME \
+    JAVA \
+    JAVA_OPTS \
+    CLASSPATH
+  do
+    local content=$(eval "echo \$$varname")
+    printf "%-15s %s\n" "$varname" \"$(eval "echo \$$varname")\"
+  done
+}

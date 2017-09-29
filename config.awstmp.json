@@ -1,0 +1,14 @@
+{
+  "server_files": {
+    "type": "aws",
+    "ACCESS_KEY_ID": "PH_GEX_KEY_ID",
+    "SECRET_ACCESS_KEY": "PH_GEX_ACESS_KEY",
+    "bucket":"gex-containers",
+    "region":"us-west-1",
+    "host": "files.gex",
+    "ip": "51.0.1.6",
+    "user": "vagrant",
+    "password": "vagrant"
+  },
+  "chef_repo": "/work/chef-repo"
+}

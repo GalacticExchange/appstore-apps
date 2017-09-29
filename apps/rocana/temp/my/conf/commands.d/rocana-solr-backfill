@@ -1,0 +1,197 @@
+#!/bin/bash
+
+# Uncomment if using Kerberos
+# export HADOOP_OPTS="-Djava.security.auth.login.config=$ROCANA_CONF_DIR/jaas-client.conf"
+
+command_type=sh
+
+# Make sure our stuff is before hadoop classpath so HDP distro gets rocana-solr-v5 earlier than
+# solr-map-reduce allowing us to override org.apache.solr.hadoop.GoLive class
+export HADOOP_USER_CLASSPATH_FIRST=true
+
+command_sh_main() {
+    help_and_exit() {
+        echo "Required arguments:"
+        echo "    --temp-dir <arg>      hdfs dir for temp files, e.g. hdfs://host:8020/rocana/temp"
+        echo "    --zookeeper <arg>     zookeeper connection string, e.g. zk-1:2181,zk-2:2181/solr"
+        echo "    --collection <arg>    name of collection to index into, e.g. events"
+        echo "    --repo <arg>          repo where event data lives, e.g. hdfs://host:8020/rocana/data"
+        echo "    --dataset <arg>       dataset where event data lives inside repo, e.g. events"
+        echo "Optional arguments:"
+        echo "    --namespace <arg>     kite namespace where the dataset exists (default: default)"
+        echo "    --min-ts <arg>        minimum event timestamp (in millis) to index"
+        echo "    --max-ts <arg>        maximum event timestamp (in millis) to index"
+        exit 1
+    }
+
+    if [[ "$1" = "-h" || "$1" = "--help" || $# -eq 0 ]]; then
+        help_and_exit
+    fi
+
+    NAMESPACE="default"
+    # Default to 0 (all timestamps are indexed)
+    MIN_TS="0"
+    MAX_TS="0"
+
+    while [[ $# -gt 0 ]]; do
+        key="$1"
+        case $key in
+            --temp-dir)
+                # create/use subdir so we know we can safely delete it
+                TEMP_DIR="$2/temp-${RANDOM}"
+                shift
+                ;;
+            --zookeeper)
+                ZOOKEEPER="$2"
+                shift
+                ;;
+            --collection)
+                COLLECTION="$2"
+                shift
+                ;;
+            --repo)
+                REPO="$2"
+                shift
+                ;;
+            --dataset)
+                DATASET="$2"
+                shift
+                ;;
+            --namespace)
+                NAMESPACE="$2"
+                shift
+                ;;
+            --min-ts)
+                MIN_TS="$2"
+                shift
+                ;;
+            --max-ts)
+                MAX_TS="$2"
+                shift
+                ;;
+            *)
+                echo "Unknown option: ${key}"
+                echo; help_and_exit
+                exit 1
+                ;;
+        esac
+        shift
+    done
+
+    exit_missing_arg() {
+        echo "Missing required argument: $1"
+        echo; help_and_exit
+        exit 1
+    }
+
+    [[ -z $TEMP_DIR ]]   && exit_missing_arg "--temp-dir"
+    [[ -z $ZOOKEEPER ]]  && exit_missing_arg "--zookeeper"
+    [[ -z $COLLECTION ]] && exit_missing_arg "--collection"
+    [[ -z $REPO ]]       && exit_missing_arg "--repo"
+    [[ -z $DATASET ]]    && exit_missing_arg "--dataset"
+
+    hadoop fs -mkdir -p $TEMP_DIR
+
+    HDP=false
+    JOB_JAR=$(find $ROCANA_LIB_DIR/rocana-solr -name "com.cloudera.search-search-mr-*.jar" -type f | sort | tail -1)
+    if [ -z $JOB_JAR ]; then
+      # In case of HDP we can use new hadoop commands which are part of common lib, instead of search-mr find tool
+      JOB_JAR=$(find $ROCANA_LIB_DIR/rocana-solr -name "org.apache.solr-solr-map-reduce-*.jar" -type f | sort | tail -1)
+      FIND_JAR=$(find $ROCANA_LIB_DIR/rocana-solr -name "org.apache.hadoop-hadoop-common-*.jar" -type f | sort | tail -1)
+      HDP=true
+    fi;
+
+    LIB_JARS=$(find $ROCANA_LIB_DIR/rocana-solr -name '*.jar' -type f | tr '\n' ',')
+
+    cat <<EOF > /tmp/blank-morphlines.conf
+morphlines : [
+  {
+    # Name used to identify a morphline. E.g. used if there are multiple morphlines in a
+    # morphline config file
+    id : morphline1
+
+    # Import all morphline commands in these java packages and their subpackages.
+    # Other commands that may be present on the classpath are not visible to this morphline.
+    importCommands : ["org.kitesdk.**", "org.apache.solr.**"]
+
+    commands : []
+  }
+]
+EOF
+
+    DATA_DIR="${REPO}/${DATASET}"
+    if ! hadoop fs -stat $DATA_DIR/.metadata &> /dev/null; then
+        OTHER_DATA_DIR=$DATA_DIR
+        DATA_DIR="${REPO}/${NAMESPACE}/${DATASET}"
+        if ! hadoop fs -stat $DATA_DIR/.metadata &> /dev/null; then
+            echo "Neither '${DATA_DIR}' or '${OTHER_DATA_DIR}' were valid dataset locations."
+            exit 1
+        fi
+    fi
+
+    export HADOOP_CLASSPATH="$ROCANA_LIB_DIR/rocana-solr/*"
+    if $HDP ; then
+      # Hadoop find command uses path without any prefix, thus we skip first 3 slashes and use remaining part of
+      # uri encoded as hdfs://aaa:8020/*this/is/path/to/get*
+      DATA_PATH=$(echo $DATA_DIR|cut -d'/' -f4-)
+      hadoop jar \
+           $FIND_JAR \
+           org.apache.hadoop.fs.FsShell \
+           -find "/$DATA_PATH" \
+           -name '*.parquet' \
+           -print \
+        | \
+        hadoop jar \
+               $JOB_JAR \
+               --libjars $LIB_JARS \
+               -D rocana.minTs=$MIN_TS \
+               -D rocana.maxTs=$MAX_TS \
+               -D rocana.zkHost=$ZOOKEEPER \
+               -D rocana.collection=$COLLECTION \
+               -D mapreduce.map.output.compress=true \
+               -D mapreduce.job.user.classpath.first=true \
+               -D mapred.map.output.compress.codec=org.apache.hadoop.io.compress.SnappyCodec \
+               -D mapreduce.job.map.class=com.rocana.solr.hadoop.IndexMapper \
+               --morphline-file /tmp/blank-morphlines.conf \
+               --output-dir $TEMP_DIR \
+               --zk-host $ZOOKEEPER \
+               --collection $COLLECTION \
+               --go-live \
+               --verbose \
+               --input-list -
+    else
+      hadoop jar \
+           $JOB_JAR \
+           org.apache.solr.hadoop.HdfsFindTool \
+           -find $DATA_DIR \
+           -type f \
+           -name '*.parquet' \
+        | \
+        hadoop jar \
+               $JOB_JAR \
+               org.apache.solr.hadoop.MapReduceIndexerTool \
+               --libjars $LIB_JARS \
+               -D rocana.minTs=$MIN_TS \
+               -D rocana.maxTs=$MAX_TS \
+               -D rocana.zkHost=$ZOOKEEPER \
+               -D rocana.collection=$COLLECTION \
+               -D mapreduce.map.output.compress=true \
+               -D mapred.map.output.compress.codec=org.apache.hadoop.io.compress.SnappyCodec \
+               -D mapreduce.job.map.class=com.rocana.solr.hadoop.IndexMapper \
+               --morphline-file /tmp/blank-morphlines.conf \
+               --output-dir $TEMP_DIR \
+               --zk-host $ZOOKEEPER \
+               --collection $COLLECTION \
+               --go-live \
+               --verbose \
+               --input-list -
+    fi
+
+    if [ $? -eq 0 ]; then
+        echo "Job success, deleting temporary directory: ${TEMP_DIR}"
+        hadoop fs -rm -R -skipTrash $TEMP_DIR
+    else
+        echo "Job failed, leaving temporary directory: ${TEMP_DIR}"
+        exit 1
+    fi
+}

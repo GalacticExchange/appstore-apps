@@ -1,0 +1,14 @@
+{
+  "master":{
+    "host": "quickstart.cloudera",
+    "ip": "51.1.0.221",
+    "ssh": {
+      "user": "cloudera",
+      "password": "cloudera"
+    }
+  },
+   "nginx":{
+    "sitename": "cluster1.gex.com"
+  }
+
+}

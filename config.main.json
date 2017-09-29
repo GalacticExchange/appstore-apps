@@ -1,0 +1,15 @@
+{
+  "server_files": {
+    "type": "ssh",
+    "host": "51.1.0.50",
+    "ip": "51.1.0.50",
+    "base_dir": "/disk2/data/containers/gex-main/files/html/applications/",
+    "user": "gex",
+    "password": "PH_GEX_PASSWD2",
+    "server_app_repo_versions": "http://gex1.devgex.net:8090/applications"
+  },
+
+  "chef_repo": "/work/chef-repo"
+
+
+}

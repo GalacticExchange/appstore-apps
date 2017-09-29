@@ -1,0 +1,25 @@
+{
+  "base": {
+    "sitename": "malava.com",
+    "opt7": "777",
+    "opt8": "88"
+  },
+  "java": {
+    "install_flavor": "oracle",
+    "jdk_version": "7",
+    "oracle": {
+      "accept_oracle_download_terms": true
+    }
+  },
+  "mysql": {
+    "root_password": "iloverandompasswordsbutthiswilldo"
+
+  },
+  "postgresql": {
+    "version": "9.4",
+    "password": {
+      "postgres": "iloverandompasswordsbutthiswilldo"
+    }
+
+  }
+}

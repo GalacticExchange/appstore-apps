@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+sudo -H -u zoomdata bash -c '/opt/zoomdata/bin/docker-runner'

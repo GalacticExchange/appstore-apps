@@ -1,0 +1,22 @@
+<logging>
+  <filter enabled="false">
+    <tag>stdout</tag>
+    <type>console</type>
+    <level>INFO</level>
+  </filter>
+  <filter enabled="true">
+    <tag>file</tag>
+    <type>file</type>
+    <level>INFO</level>
+    <property name="filename">${ROCANA_HOME}/logs/rocana-agent.log</property>
+    <!-- Rotate when a log message is written after midnight -->
+    <property name="rotate">true</property>
+    <property name="daily">true</property>
+    <!-- Include milliseconds in log timestamps -->
+    <property name="format">[%D %A] [%L] (%S) %M</property>
+    <!-- Rotate using .YYYY-MM-DD instead of .001, .002, etc -->
+    <property name="datesuffix">false</property>
+    <!-- Rotate at startup -->
+    <property name="rotateonstartup">true</property>
+  </filter>
+</logging>

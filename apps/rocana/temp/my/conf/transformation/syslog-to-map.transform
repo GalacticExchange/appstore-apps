@@ -1,0 +1,68 @@
+#
+# Copyright (c) 2015 Rocana. All rights reserved.
+#
+
+name = syslog-to-map
+
+transform.syslog-to-map = filter, map
+
+transform.syslog-to-map.filter.source = input.events
+transform.syslog-to-map.filter.substages = event-loader, set-var, to-int, comparison
+transform.syslog-to-map.filter.current-value = event
+transform.syslog-to-map.filter.destination = filtered-events
+transform.syslog-to-map.filter.filter-on = is_syslog_event_type
+
+transform.syslog-to-map.event-loader.source = event
+transform.syslog-to-map.event-loader.destination = e
+
+transform.syslog-to-map.set-var.value = 100
+transform.syslog-to-map.set-var.destination = syslog_type_id_str
+
+transform.syslog-to-map.to-int.source = syslog_type_id_str
+transform.syslog-to-map.to-int.destination = syslog_type_id
+
+transform.syslog-to-map.comparison.first-operand = syslog_type_id
+transform.syslog-to-map.comparison.operand-type = EQ
+transform.syslog-to-map.comparison.second-operand = e.eventTypeId
+transform.syslog-to-map.comparison.destination = is_syslog_event_type
+
+
+transform.syslog-to-map.map.source = filtered-events
+transform.syslog-to-map.map.destination = event
+transform.syslog-to-map.map.stages = event-loader, ti1, ti2, ti3, to-long, set-def-req-size, req-to-long, map-builder, list-accumulator
+
+transform.syslog-to-map.event-loader.source = event
+transform.syslog-to-map.event-loader.destination = e
+
+transform.syslog-to-map.ti1 = to-int
+transform.syslog-to-map.ti1.source = e.attr.syslog_facility
+transform.syslog-to-map.ti1.destination = fac_as_int
+
+transform.syslog-to-map.ti2 = to-int
+transform.syslog-to-map.ti2.source = e.attr.syslog_severity
+transform.syslog-to-map.ti2.destination = sev_as_int
+
+transform.syslog-to-map.ti3 = to-int
+transform.syslog-to-map.ti3.source = e.attr.syslog_pid
+transform.syslog-to-map.ti3.destination = pid_as_int
+
+transform.syslog-to-map.to-long.source = e.attr.syslog_ts
+transform.syslog-to-map.to-long.destination = syslog_ts_as_long
+
+transform.syslog-to-map.set-def-req-size = set-var
+transform.syslog-to-map.set-def-req-size.destination = req_size_str
+transform.syslog-to-map.set-def-req-size.value = 12
+
+transform.syslog-to-map.req-to-long = to-long
+transform.syslog-to-map.req-to-long.source = req_size_str
+transform.syslog-to-map.req-to-long.destination = req_size
+
+transform.syslog-to-map.map-builder.destination = event-as-map
+transform.syslog-to-map.map-builder.var.ts = e.ts
+transform.syslog-to-map.map-builder.var.syslog_severity = sev_as_int
+transform.syslog-to-map.map-builder.var.syslog_host = e.attr.syslog_hostname
+transform.syslog-to-map.map-builder.var.request_size = req_size
+
+
+transform.syslog-to-map.list-accumulator.source = event-as-map
+transform.syslog-to-map.list-accumulator.destination = output.records

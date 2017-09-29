@@ -1,0 +1,229 @@
+#!/bin/sh
+
+command_type=sh
+
+diag_bundle_format_version="1"
+
+diag_files=$(grep -vE '(^[#[:space:]])|(^$)' "$ROCANA_CONF_DIR/rocana-diag-bundle/files")
+diag_commands=$(grep -vE '(^[#[:space:]])|(^$)' "$ROCANA_CONF_DIR/rocana-diag-bundle/commands")
+
+command_sh_main() {
+  for command in printf tar pushd popd sed cat ; do
+    type -p "$command" 1> /dev/null || {
+      echo "Missing command $command"
+    }
+  done
+
+  help_and_exit() {
+    echo "Optional arguments:"
+    echo "    --temp-dir <dir>      directory for temporary files (defaults to /tmp)"
+    exit 1
+  }
+
+  TEMP_DIR="/tmp"
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case $key in
+      --temp-dir)
+        TEMP_DIR="$2"
+        shift
+        ;;
+      --help)
+        echo; help_and_exit
+        exit 1
+        ;;
+      *)
+        echo "Unknown option: ${key}"
+        echo; help_and_exit
+        exit 1
+        ;;
+    esac
+    shift
+  done
+
+  printf "Capturing diagnostic information:\n\n"
+
+  timestamp=$(date "+%Y%m%d-%H%M%S%Z")
+  dir_name="rocana-diag-$timestamp"
+  work_dir="${TEMP_DIR}/$dir_name"
+  commands_dir="$work_dir/commands"
+  files_dir="$work_dir/files"
+  diag_archive="${TEMP_DIR}/rocana-diag-${timestamp}.tar.gz"
+
+  printf "Working directory: $work_dir\n"
+  printf "Archive file: $diag_archive\n\n"
+
+  mkdir -p "$work_dir"
+  mkdir "$commands_dir"
+  mkdir "$files_dir"
+
+  pushd "$TEMP_DIR" > /dev/null
+  pushd "$work_dir" > /dev/null
+  pushd "$commands_dir" > /dev/null
+
+  printf "Capturing command output\n\n"
+
+  old_ifs=$IFS
+  IFS=$'\n'
+  for cmd in $diag_commands ; do
+    IFS="$old_ifs"
+    printf "command: $cmd\n"
+    cmd_expanded=$(eval "echo $cmd")
+    cmd_file=$(echo $cmd_expanded | sed -e 's/[\/ ]/_/g')
+    $cmd_expanded > "$cmd_file" 2>&1
+    status="$?"
+    [ "$status" -ne "0" ] && printf "\nFAILED WITH STATUS: $status\n" >> $cmd_file
+  done
+
+  # Leave command dir
+  popd > /dev/null
+
+  pushd "$files_dir" > /dev/null
+
+  printf "\nCapturing files and directories\n\n"
+
+  for f in $diag_files ; do
+    file_expanded=$(eval "echo $f")
+    file_file=$(echo $file_expanded | sed -e 's/[\/ ]/_/g')
+
+    printf "file: $file_expanded\n"
+
+    if [ -f "$file_expanded" ] ; then
+      cat $file_expanded > $file_file
+    else
+      echo "MISSING" > $file_file
+    fi
+  done
+
+  # Leave files dir
+  popd > /dev/null
+
+  printf "\nCapturing Rocana configuration\n"
+
+  if [ -d "$ROCANA_CONF_DIR" ] ; then
+    cp -rp "$ROCANA_CONF_DIR" "$work_dir/"
+  else
+    echo "Error: Unabled to find ROCANA_CONF_DIR - report this error to Rocana."
+    echo "Skipping configuration collection!"
+  fi
+
+  printf "\nCapturing Rocana logs\n"
+
+  if [ -d "$ROCANA_HOME/logs" ] ; then
+    cp -rp "$ROCANA_HOME/logs" "$work_dir/"
+  else
+    echo "Notice: Unable to find ROCANA_HOME/logs - this is normal if you've moved logs or never run the software."
+    echo "Skipping log collection!"
+  fi
+
+  # Leave work dir
+  popd > /dev/null
+
+  tar -zcf "$diag_archive" "$dir_name"
+  rm -rf "$work_dir"
+
+  # Leave tmp
+  popd > /dev/null
+
+  printf "\nArchive file: $diag_archive\n"
+}
+
+alternatives_display_all() {
+  [ -d "/etc/alternatives" ] || {
+    echo "Error: No /etc/alternatives directory"
+    return 1
+  }
+
+  for name in $(ls -1 /etc/alternatives/) ; do
+    alternatives --display $name
+  done
+
+  return 0
+}
+
+diag_bundle_format_version() {
+  echo "$diag_bundle_format_version"
+
+  return 0
+}
+
+yum_repo_files() {
+  [ -d "/etc/yum.repos.d" ] || {
+    echo "Error: No /etc/yum.repos.d directory"
+    return 1
+  }
+
+  for fn in $(ls -1 /etc/yum.repos.d) ; do
+    echo "FILE: $fn ========"
+    cat "/etc/yum.repos.d/$fn"
+  done
+
+  return 0
+}
+
+collect_profile() {
+    mkdir -p agent-profiles
+    curl --output agent-profiles/heap         http://localhost:17323/debug/pprof/heap
+    curl --output agent-profiles/block        http://localhost:17323/debug/pprof/block
+    curl --output agent-profiles/symbol       http://localhost:17323/debug/pprof/symbol
+    curl --output agent-profiles/profile      http://localhost:17323/debug/pprof/profile?seconds=10
+    curl --output agent-profiles/goroutine    http://localhost:17323/debug/pprof/goroutine
+    curl --output agent-profiles/threadcreate http://localhost:17323/debug/pprof/threadcreate
+}
+
+collect_perf() {
+    if ! command -v perf >/dev/null 2>&1; then
+        echo "Require 'perf' to do agent profiling, but it's not installed. Aborting."; 
+        return 1;
+    fi
+    if [ "$EUID" -ne 0 ]; then
+        echo "Collecting 'perf' profile requires root. Aborting.";
+        return 1;
+    fi
+    pid=$(agent_pid)
+    if [ -z "$pid" ]; then
+        echo "Agent does not appear to be running, skipping perf analysis";
+        return 0;
+    fi
+    perf record -g --pid "$pid" &
+    perf_pid=$!
+    sleep 10
+    kill $perf_pid
+}
+
+collect_strace() {
+    if ! command -v strace >/dev/null 2>&1; then
+        echo "Require 'strace' to do agent tracing, but it's not installed. Aborting."; 
+        return 1;
+    fi
+    pid=$(agent_pid)
+    if [ -z "$pid" ]; then
+        echo "Agent does not appear to be running, skipping strace";
+        return 0;
+    fi
+    mkdir -p strace-results
+    strace -Ttt -f -ff -o strace-results/results.out -p "$pid" &
+    trace_pid=$!
+    sleep 10
+    kill $trace_pid
+}
+
+agent_pid() {
+    # Search the process list filtering out the search process itself, then look for
+    # the 'rocana-agent' process and also filter out the bash wrapper script.
+    ps -ef | grep -v grep |grep "rocana-agent"|grep -v "bin/sh" | awk '{print $2}'
+}
+
+analyze_agent_files() {
+    tailed_paths=$(cat $ROCANA_CONF_DIR/rocana-agent/agent.cfg |cut -f 1 -d '#'|grep -v "^\s*$"|sed 's/^\s*//g' | grep -i ^path|cut -d '=' -f 2)
+    for path in $tailed_paths; do
+        echo "Inspecting tailed file '$path'"
+        ls -lH "$path"
+        
+        echo "Parent directory:"
+        ls -ld $(dirname "$path")
+        
+        echo "Parent contents:"
+        ls -l $(dirname "$path")
+    done
+}

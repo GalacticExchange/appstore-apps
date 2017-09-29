@@ -1,0 +1,71 @@
+{
+  "variables": {},
+  "builders": [
+    {
+      "pull": false,
+      "type": "docker",
+      "image": "base-phusion-ruby-chef:latest",
+      "commit": true
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "chef-solo",
+      "prevent_sudo": true,
+      "cookbook_paths": [
+        "/projects/chef-repo/cookbooks",
+        "/projects/chef-repo/cookbooks-common",
+        "/mnt/data/projects/mmx/gexcloud-docker/servers/provisioner/cookbooks"
+      ],
+      "json": {
+        "routes": [
+          "ip route replace 51.1.0.50 dev eth0 src 51.0.0.55"
+        ],
+        "office_ips": "46.172.71.50, 10., 127., 51., 172.82.",
+        "ssh": {
+          "keys": [],
+          "pub_keys_content": []
+        },
+        "hosts": [
+          [
+            "46.172.71.53",
+            "git.gex"
+          ],
+          [
+            "51.0.0.55",
+            "provisioner"
+          ],
+          [
+            "51.0.0.32",
+            "webproxy"
+          ],
+          [
+            "51.0.1.8",
+            "proxy"
+          ],
+          [
+            "51.0.1.15",
+            "openvpn"
+          ],
+          [
+            "51.0.0.33",
+            "master"
+          ],
+          [
+            "51.1.0.50",
+            "master.gex"
+          ]
+        ]
+      },
+      "run_list": [
+        "recipe[provisioner::build]"
+      ]
+    }
+  ],
+  "post-processors": [
+    {
+      "repository": "gex-provisioner",
+      "type": "docker-tag"
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+#
+# Copyright (c) 2015 Rocana. All rights reserved.
+#
+# Rocana Data Tool configuration file. For full configuration details, see the
+# Rocana Reference Guide.
+###################################################################################################
+# Name: kafka.brokers
+# Required: Yes
+#
+# A comma-separated list of `<hostname>:<port>` of kafka brokers servers to use.
+kafka.brokers = <%=@node['kafka']['broker']%>
+
+###################################################################################################
+# Name: producer.topic
+# Required: Yes
+#
+# The kafka topic to send events to.
+producer.topic = <%=@node['rocana']['kafka_topic_name']%>
+###################################################################################################
+# Name: producer.key.serializer.class
+# Name: producer.serializer.class
+# Required: Yes
+#
+# Advanced. Set the serializer only if producing JSON-encoded events. The
+# encoder class to use when placing events on the topic. It's rarely necessary
+# to change this unless directed to do so.
+# Defaults:
+# producer.key.serializer.class = kafka.serializer.DefaultEncoder
+# producer.serializer.class = com.rocana.kafka.EventEncoder
+producer.key.serializer.class = kafka.serializer.DefaultEncoder
+producer.serializer.class = com.rocana.kafka.EventEncoder
+###################################################################################################
+# Name: producer.request.required.acks
+# Required: No
+#
+# Require acknowledgment of sending events to Kafka. It's rarely necessary to
+# change this (from 1) unless directed to do so. 1 = true, 0 = false.
+producer.request.required.acks = 1
+

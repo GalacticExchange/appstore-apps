@@ -1,0 +1,18 @@
+[Unit]
+Description=Datameer Service
+After=network.target
+
+
+[Service]
+Type=forking
+ExecStart=/usr/bin/nohup <%=@datameer_base_dir%>/bin/conductor.sh start
+Restart=always
+User=root
+TimeoutStartSec=300
+TimeoutStopSec=300
+
+
+
+[Install]
+WantedBy=multi-user.target
+

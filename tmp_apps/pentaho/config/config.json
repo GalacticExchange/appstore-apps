@@ -1,0 +1,16 @@
+{
+  "master":{
+    "host": "quickstart.cloudera",
+    "ip": "51.1.0.221",
+    "ssh": {
+      "user": "cloudera",
+      "password": "cloudera"
+    }
+  },
+   "zoomdata":{
+    "webui": {
+      "port": 8080
+    }
+  }
+
+}

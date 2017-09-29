@@ -1,0 +1,10 @@
+{
+  "base": {
+    "container_name": "app-nginx",
+    "base_image": "ubuntu-systemd",
+    "base_image_tag": "15.10"
+  },
+  "nginx": {
+    "sitename": "gex.com"
+  }
+}

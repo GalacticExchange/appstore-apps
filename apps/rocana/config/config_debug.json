@@ -1,0 +1,22 @@
+{
+  "master":{
+    "ip": "51.0.12.21",
+    "host": "51.0.12.21",
+    "ssh": {
+      "user": "vagrant",
+      "password": "vagrant"
+    }
+  },
+  "zookeeper": {
+    "url": "quickstart.cloudera:2181",
+    "host": "quickstart.cloudera",
+    "port": "2181"
+  },
+  "kafka": {
+    "host": "kafka.gex",
+    "broker": "quickstart.cloudera:9092"
+  },
+  "rocana":{
+    "kafka_topic_name": "events"
+  }
+}

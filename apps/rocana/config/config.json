@@ -1,0 +1,59 @@
+{
+  "master":{
+    "host": "quickstart.cloudera",
+    "ip": "51.1.0.221",
+    "ssh": {
+      "user": "cloudera",
+      "password": "cloudera"
+    }
+  },
+  "zookeeper": {
+    "url": "quickstart.cloudera:2181",
+    "host": "quickstart.cloudera",
+    "port": "2181"
+  },
+  "hdfs": {
+    "url": "quickstart.cloudera:8020",
+    "host": "quickstart.cloudera",
+    "port": "8020"
+  },
+  "kafka": {
+    "host": "quickstart.cloudera",
+    "broker": "quickstart.cloudera:9092"
+  },
+  "solr": {
+    "events_repo": "quickstart.cloudera:2181/solr"
+  },
+  "network":{
+    "network_with_mask": "51.0.0.1/8"
+  },
+  "postgresql": {
+
+
+  },
+  "hive": {
+    "host": "quickstart.cloudera",
+    "port": "9083"
+
+  },
+  "impala": {
+    "host": "quickstart.cloudera",
+    "port": 21050
+  },
+  "rocana":{
+    "user": {
+      "name": "rocana",
+      "password": "rocana"
+    },
+    "events_topic_name": "events",
+    "kafka_topic_name": "events",
+    "impala_metrics_table": "metrics",
+    "impala_anomalies_table": "anomalies",
+    "postgresql":{
+      "user": "rocana",
+      "password": "rocana",
+      "db": "rocana"
+    }
+  }
+
+}

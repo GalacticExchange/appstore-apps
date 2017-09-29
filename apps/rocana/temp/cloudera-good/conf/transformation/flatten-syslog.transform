@@ -1,0 +1,72 @@
+#
+# Copyright (c) 2015 Rocana. All rights reserved.
+#
+
+name = flatten-syslog
+
+transform.flatten-syslog = filter, map
+
+transform.flatten-syslog.filter.source = input.events
+transform.flatten-syslog.filter.substages = event-loader, set-var, to-int, comparison
+transform.flatten-syslog.filter.current-value = event
+transform.flatten-syslog.filter.destination = filtered-events
+transform.flatten-syslog.filter.filter-on = is_syslog_event_type
+
+transform.flatten-syslog.event-loader.source = event
+transform.flatten-syslog.event-loader.destination = e
+
+transform.flatten-syslog.set-var.value = 100
+transform.flatten-syslog.set-var.destination = syslog_type_id_str
+
+transform.flatten-syslog.to-int.source = syslog_type_id_str
+transform.flatten-syslog.to-int.destination = syslog_type_id
+
+transform.flatten-syslog.comparison.first-operand = syslog_type_id
+transform.flatten-syslog.comparison.operand-type = EQ
+transform.flatten-syslog.comparison.second-operand = e.eventTypeId
+transform.flatten-syslog.comparison.destination = is_syslog_event_type
+
+
+transform.flatten-syslog.map.source = filtered-events
+transform.flatten-syslog.map.destination = event
+transform.flatten-syslog.map.stages = event-loader, ti1, ti2, ti3, to-long, avro-record-builder, list-accumulator
+
+transform.flatten-syslog.event-loader.source = event
+transform.flatten-syslog.event-loader.destination = e
+
+transform.flatten-syslog.ti1 = to-int
+transform.flatten-syslog.ti1.source = e.attr.syslog_facility
+transform.flatten-syslog.ti1.destination = fac_as_int
+
+transform.flatten-syslog.ti2 = to-int
+transform.flatten-syslog.ti2.source = e.attr.syslog_severity
+transform.flatten-syslog.ti2.destination = sev_as_int
+
+transform.flatten-syslog.ti3 = to-int
+transform.flatten-syslog.ti3.source = e.attr.syslog_pid
+transform.flatten-syslog.ti3.destination = pid_as_int
+
+transform.flatten-syslog.to-long.source = e.attr.syslog_ts
+transform.flatten-syslog.to-long.destination = syslog_ts_as_long
+
+transform.flatten-syslog.avro-record-builder.schema-file = conf/schemas/flattened-syslog.avsc
+transform.flatten-syslog.avro-record-builder.destination = output-record
+transform.flatten-syslog.avro-record-builder.attr-source.ts = e.ts
+transform.flatten-syslog.avro-record-builder.attr-source.event_type_id = e.eventTypeId
+transform.flatten-syslog.avro-record-builder.attr-source.source = e.source
+transform.flatten-syslog.avro-record-builder.attr-source.location = e.location
+transform.flatten-syslog.avro-record-builder.attr-source.host = e.host
+transform.flatten-syslog.avro-record-builder.attr-source.service = e.service
+transform.flatten-syslog.avro-record-builder.attr-source.body = e.body
+transform.flatten-syslog.avro-record-builder.attr-source.parent_id = e.id
+transform.flatten-syslog.avro-record-builder.attr-source.syslog_facility = fac_as_int
+transform.flatten-syslog.avro-record-builder.attr-source.syslog_severity = sev_as_int
+transform.flatten-syslog.avro-record-builder.attr-source.syslog_hostname = e.attr.syslog_hostname
+transform.flatten-syslog.avro-record-builder.attr-source.syslog_message = e.attr.syslog_message
+transform.flatten-syslog.avro-record-builder.attr-source.syslog_pid = pid_as_int
+transform.flatten-syslog.avro-record-builder.attr-source.syslog_process = e.attr.syslog_process
+transform.flatten-syslog.avro-record-builder.attr-source.syslog_ts = syslog_ts_as_long
+
+
+transform.flatten-syslog.list-accumulator.source = output-record
+transform.flatten-syslog.list-accumulator.destination = output.records

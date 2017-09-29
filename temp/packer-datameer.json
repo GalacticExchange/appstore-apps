@@ -1,0 +1,47 @@
+{
+  "variables": {},
+  "builders": [
+    {
+      "pull": false,
+      "type": "docker",
+      "image": "ubuntu-systemd:15.10",
+      "commit": true
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "chef-solo",
+      "prevent_sudo": true,
+      "cookbook_paths": [
+        "/home/dmitry/projects/chef-repo/cookbooks",
+        "/home/dmitry/projects/chef-repo/cookbooks-common",
+        "/home/dmitry/projects/appstore-apps/apps/datameer/build/cookbooks"
+      ],
+      "json": {
+        "java": {
+          "install_flavor": "oracle",
+          "jdk_version": "7",
+          "oracle": {
+            "accept_oracle_download_terms": true
+          }
+        },
+        "datameer": {
+          "release": "5.11.14-cdh-5.7.0-mr2",
+          "license_path": "/"
+        },
+        "base": {
+          "command": "systemd"
+        }
+      },
+      "run_list": [
+        "recipe[datameer::default]"
+      ]
+    }
+  ],
+  "post-processors": [
+    {
+      "repository": "gex-datameer",
+      "type": "docker-tag"
+    }
+  ]
+}

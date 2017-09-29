@@ -1,0 +1,523 @@
+#
+# Copyright (c) 2015 Rocana. All rights reserved.
+#
+# This is a sample Analytics Consumer configuration file. For the full documentation,
+# see the Rocana Reference Guide.
+###################################################################################################
+# Name: impala.host
+# Required: Yes
+#
+# The host that will be used to query Impala for metric data.
+#
+# Ex.
+
+
+#impala.host = localhost
+
+#impala.host = <% @node['impala']['host'] %>
+impala.host = <%=@node['hive']['host']%>
+
+
+###################################################################################################
+# Name: impala.port
+# Required: No
+#
+# Impala SQL access port, 21050 by default.
+#
+# Ex.
+#impala.port = <% @node['impala']['port'] %>
+
+###################################################################################################
+# Name: kerberos.principal
+# Required: Yes (in a kerberos environment)
+#
+# The user to connect to Impala as - kerberos.keytab must contain a key for this principal.
+#
+# Ex.
+# kerberos.principal = rocana@EXAMPLE.COM
+###################################################################################################
+# Name: kerberos.principal.keytab
+# Required: Yes (in a kerberos environment)
+#
+# The keytab to use when connecting to Impala. This must contain a key for kerberos.principal
+# and be readable by the user running the web server.
+#
+# Ex.
+# kerberos.principal.keytab = /opt/rocana/rocana.keytab
+###################################################################################################
+# Name: kerberos.impala.principal
+# Required: Yes (in a kerberos environment)
+#
+# The Kerberos principal used to start Impala on impala.host. It's not necessary to provide a keytab
+# for this principal. This principal must include the hostname, which should be impala.host. If you
+# leave the hostname set to "_HOST", it will automatically be replaced with the fully qualified
+# domain name of the Impala server.
+#
+# Ex.
+# kerberos.impala.principal = impala/_HOST@EXAMPLE.COM
+###################################################################################################
+# Name: jdbc.url
+# Required: Yes
+#
+# The Analytics Consumer requires access to the same PostgreSQL 8+ database as the webapp.
+# The jdbc.url specifies which database to connect to. This database must be setup prior
+# to starting the Analytics Consumer by starting the webapp.
+#
+# Ex.
+jdbc.url = jdbc:postgresql://localhost/rocana
+
+###################################################################################################
+# Name: jdbc.user
+# Required: Yes
+#
+# The user name to connect to the database with.
+#
+# Ex.
+jdbc.user = <%=@node['rocana']['postgresql']['user'] %>
+
+###################################################################################################
+# Name: jdbc.password
+# Required: Yes
+#
+# The password to connect to the database with.
+#
+# Ex.
+jdbc.password = <%=@node['rocana']['postgresql']['password'] %>
+
+###################################################################################################
+# Name: pipeline
+# Required: Yes
+#
+# A comma separated list of pipeline configuration names. Each pipeline
+# configuration creates one or more pipelines in the consumer based on the
+# specified number of threads. A pipeline is fully independent, with its own
+# analytics and anomalies produced.
+#
+# Ex. A single pipeline called events.
+pipeline = events
+
+
+#
+# Ex. Two pipelines called events-b and events-b
+# pipeline = events-a, events-b
+###################################################################################################
+# Name: pipeline.<config name>.producer.kafka.brokers
+# Required: Yes
+#
+# A comma separated list of <hostname>:<port> of Kafka brokers where events will be sent to
+#
+# Results of data analysis such as anomaly detection are events which are pushed back
+# into Kafka and then indexed into Solr by the Solr consumer. For the anomalies to be
+# displayed in the UI this has to match the Kafka brokers configured for the Solr consumer.
+#
+# Ex.
+pipeline.events.producer.kafka.brokers = <%=@node['kafka']['broker']%>
+
+
+###################################################################################################
+# Name: pipeline.<config name>.producer.topic
+# Required: Yes
+#
+# The name of the Kafka topic which the analysis results will be sent to.
+#
+# This must match the name of a kafka topic that the Solr consumer uses to consume events.
+#
+# Ex.
+pipeline.events.producer.topic = <%=@node['rocana']['events_topic_name']%>
+
+
+###################################################################################################
+# Name: pipeline.<config name>.analytics.window-time-min
+# Required: No
+# Default: 1 minute
+#
+# The window size in minutes used to retrieve all event volume aggregates from Impala.
+#
+# The minimum allowed interval is one minute which is the default value.
+#
+# Ex.
+# pipeline.events.analytics.window-time-min = 1
+###################################################################################################
+# Name: pipeline.<config name>.analytics.timezone
+# Required: No
+# Default: UTC
+#
+# The timezone used for building the historical models for all event volume
+# anomaly detection.
+#
+# Ex.
+# pipeline.events.analytics.timezone = UTC
+###################################################################################################
+# Name: pipeline.<config name>.analytics.impala.table
+# Required: No
+# Default: metrics
+#
+# The table name in Impala where metrics data lives.
+#
+# Ex.
+# pipeline.events.analytics.impala.table = metrics
+###################################################################################################
+# Name: pipeline.<config name>.analytics.impala.namespace
+# Required: No
+# Default: default
+#
+# The namespace in Impala where metrics data lives.
+#
+# Ex.
+# pipeline.events.analytics.impala.namespace = rocana
+###################################################################################################
+# Name: pipeline.<config name>.analytics.impala.delay-min
+# Required: No
+# Default: 6 minutes
+#
+# The artificial delay to allow complete metrics data to be written in Impala. This should be a
+# balance between lower latency and having complete data for detecting anomalies.
+#
+# Ex.
+# pipeline.events.analytics.impala.delay-min = 6
+###################################################################################################
+# Name: pipeline.<config name>.analytics.impala.custom-functions-path
+# Required: No
+# Default: /user/impala/udfs/librocana-udfs.so
+#
+# The location in HDFS where the Impala UDF shared object file lives.
+#
+# Ex.
+pipeline.events.analytics.impala.custom-functions-path = /user/impala/udfs/librocana-udfs.so
+
+
+###################################################################################################
+# Name: pipeline.<config name>.analytics.sensitivity
+# Required: No
+# Default: Estimated from the data
+#
+# The sensitivity is used for configuring the piecewise linear regression. A larger number means a
+# more loosely fitted model and lower susceptibility to false positives. If the number is too small
+# the model could suffer from over fitting.
+#
+# Ex.
+# pipeline.events.analytics.sensitivity = 35
+###################################################################################################
+# Name: pipeline.<config name>.analytics.threshold
+# Required: No
+# Default: Estimated from the data
+#
+# The threshold used to determine if a point is an anomaly or not. New incoming data points are
+# compared against the reference model and if the distance is larger than this threshold an anomaly
+# is detected.
+#
+# A larger number would lead to fewer anomalies detected and a too small of a number could result in
+# false positives.
+#
+# Ex.
+# pipeline.events.analytics.threshold = 45
+###################################################################################################
+# Name: pipeline.<config name>.analytics.threshold.number-sd
+# Required: No
+# Default: 4.5
+#
+# A factor that is used to estimate the threshold, which is derived from the statistical
+# analysis of observed model fit scores over a window of time.
+#
+# A larger number would lead to fewer anomalies detected and a too small of a number could result
+# in false positives.
+#
+# Ex.
+# pipeline.events.analytics.threshold.number-sd = 4.5
+###################################################################################################
+# Name: pipeline.<config name>.analytics.historical-window-min
+# Required: No
+# Default: 60 minutes
+#
+# The window size in minutes used to estimate the threshold from the historical data.
+#
+# A larger window would increase lead to fewer anomalies detected and a too small of a window
+# could result in false positives.
+#
+# Ex.
+# pipeline.events.analytics.historical-window-min = 60
+###################################################################################################
+# Name: pipeline.<config name>.analytics.historical-weeks-num
+# Required: No
+# Default: 8 weeks
+#
+# The maximum number of weeks used to gather historical event volume for building a model.
+#
+# A new model is created for each new day by looking back at the corresponding day in previous weeks.
+#
+# The model is used to represent normal behaviour so too large of a number would create an outdated
+# inaccurate model. Too small of a number would under represent the historical data
+# and could lead to including anomalies and unexpected behaviour in the model.
+#
+# Ex.
+# pipeline.events.analytics.historical-weeks-num = 8
+###################################################################################################
+# Name: pipeline.<config name>.analytics.compare-interval-min
+# Required: No
+# Default: 5 minutes
+#
+# This specifies the time interval at which the new data is compared against the historical model
+# to check for anomalies. This must be larger than the window-time-min configuration.
+# The default is set at 5 minutes.
+#
+# Ex.
+# pipeline.events.analytics.compare-interval-min = 5
+###################################################################################################
+# Name: pipeline.<config name>.analytics.threads
+# Required: No
+# Default: 1
+#
+# The number of threads that will be created to perform anomaly detection. More threads mean
+# more work is performed in parallel. For a dedicated machine, one thread for each physical CPU
+# core is appropriate.
+#
+# Ex.
+# pipeline.events.analytics.threads = 4
+###################################################################################################
+# Name: pipeline.<config name>.analytics.blacklist.key
+# Required: No
+#
+# This is a comma separated list of blacklist configuration names. It is used to blacklist data
+# sources from anomaly detection. For instance, if you don't want anomaly detection on event
+# volume originating from a specific service such as Zookeeper you would configure it using a
+# blacklist.
+#
+# Ex.
+# pipeline.events.analytics.blacklist.key = blackList1, blackList2, blackList3
+###################################################################################################
+# Name: pipeline.<config name>.analytics.blacklist.<blacklist name>.location
+# Required: No
+#
+# Data source location to be blacklisted
+#
+# Ex.
+# pipeline.events.analytics.blacklist.blackList1.location = aws-us-west-2
+###################################################################################################
+# Name: pipeline.<config name>.analytics.blacklist.<blacklist name>.host
+# Required: No
+#
+# Data source host to be blacklisted
+#
+# Ex.
+# pipeline.events.analytics.blacklist.blackList1.host = host1
+###################################################################################################
+# Name: pipeline.<config name>.analytics.blacklist.<blacklist name>.service
+# Required: No
+#
+# Data source service to be blacklisted
+#
+# Ex.
+# pipeline.events.analytics.blacklist.blackList1.service = zookeeper
+###################################################################################################
+# Name: pipeline.<config name>.analytics.blacklist.<blacklist name>.name
+# Required: No
+#
+# Data source metric name to be blacklisted
+#
+# Ex.
+# pipeline.events.analytics.blacklist.blackList1.name = rocana.host.cpu.all.perc_sys
+###################################################################################################
+# Name: pipeline.<config name>.analytics.blacklist.<blacklist name>.exp
+# Required: No
+#
+# Expressions that correspond to Impala's SQL operators.
+#
+# Ex.
+# pipeline.events.analytics.blacklist.blackList1.exp = host like 'pr%', service like 's1%'
+###################################################################################################
+# Name: pipeline.<config name>.analytics.model
+# Required: No
+#
+# This is used to configure anomaly detection on multiple event volume sources. For instance,
+# anomaly detection on event volume originating from a specific service such as Zookeeper.
+#
+# It is a comma separated list of model configuration names. Each model configuration creates an
+# independent anomaly detection worker. The models are restricted to event volume which have the
+# rocana.event.count metric name in the specified Impala table.
+#
+# Ex. A single model called host-1.
+# pipeline.events.analytics.model = host-1
+#
+# Ex. Two models called host-1 and service-1.
+# pipeline.events.analytics.model = host-1, service-1
+###################################################################################################
+# Name: pipeline.<config name>.analytics.<model name>.model-location
+# Required: No
+#
+# Event volume location.
+#
+# Ex.
+# pipeline.events.analytics.host-1.model-location = aws-us-west-2
+###################################################################################################
+# Name: pipeline.<config name>.analytics.<model name>.model-host
+# Required: No
+#
+# Event volume hostname.
+#
+# Ex.
+# pipeline.events.analytics.host-1.model-host = host01.mydomain.com
+###################################################################################################
+# Name: pipeline.<config name>.analytics.<model name>.model-service
+# Required: No
+#
+# Event volume service.
+#
+# Ex.
+# pipeline.events.analytics.host-1.model-service = zookeeper
+###################################################################################################
+# Name: pipeline.<config name>.analytics.<model name>.window-time-min
+# Required: No
+# Default: 1 minute
+#
+# The window size in minutes used to retrieve event volume aggregates for the specified source
+# from Impala.
+#
+# The minimum allowed interval is one minute which is the default value.
+#
+# Ex.
+# pipeline.events.analytics.host-1.window-time-min = 1
+###################################################################################################
+# Name: pipeline.<config name>.analytics.<model name>.timezone
+# Required: No
+# Default: UTC
+#
+# The timezone used for building the historical models for anomaly detection.
+#
+# Ex.
+# pipeline.events.analytics.host-1.timezone = UTC
+###################################################################################################
+# Name: pipeline.<config name>.analytics.<model name>.impala.table
+# Required: No
+# Default: metrics
+#
+# The table name in Impala where metrics data lives.
+#
+# Ex.
+# pipeline.events.analytics.host-1.impala.table = metrics
+###################################################################################################
+# Name: pipeline.<config name>.analytics.<model name>.impala.namespace
+# Required: No
+# Default: default
+#
+# The namespace in Impala where metrics data lives.
+#
+# Ex.
+# pipeline.events.analytics.host-1.impala.namespace = rocana
+###################################################################################################
+# Name: pipeline.<config name>.analytics.<model name>.sensitivity
+# Required: No
+# Default: Estimated from the data
+#
+# The sensitivity is used for configuring the piecewise linear regression. A larger number means a
+# more loosely fitted model and lower susceptibility to false positives. If the number is too small
+# the model could suffer from over fitting.
+#
+# Ex.
+# pipeline.events.analytics.host-1.sensitivity = 35
+###################################################################################################
+# Name: pipeline.<config name>.analytics.<model name>.threshold
+# Required: No
+# Default: Estimated from the data
+#
+# The threshold used to determine if a point is an anomaly or not. New incoming data points are
+# compared against the reference model and if the distance is larger than this threshold an anomaly
+# is detected.
+#
+# A larger number would lead to fewer anomalies detected and a too small of a number could result in
+# false positives.
+#
+# pipeline.events.analytics.host-1.threshold = 45
+###################################################################################################
+# Name: pipeline.<config name>.analytics.<model name>.threshold.number-sd
+# Required: No
+# Default: 4.5
+#
+# A factor that is used to estimate the threshold, which is derived from the statistical
+# analysis of observed model fit scores over a window of time.
+#
+# A larger number would lead to fewer anomalies detected and a too small of a number could result
+# in false positives.
+#
+# Ex.
+# pipeline.events.analytics.host-1.threshold.number-sd = 4.5
+###################################################################################################
+# Name: pipeline.<config name>.analytics.<model name>.historical-window-min
+# Required: No
+# Default: 60 minutes
+#
+# The window size in minutes used to estimate the threshold from the historical data.
+#
+# A larger window would increase lead to fewer anomalies detected and a too small of a window
+# could result in false positives.
+#
+# Ex.
+# pipeline.events.analytics.host-1.historical-window-min = 60
+###################################################################################################
+# Name: pipeline.<config name>.analytics.<model name>.historical-weeks-num
+# Required: No
+# Default: 8 weeks
+#
+# The maximum number of weeks used to gather historical event volume data generated by the
+# specified source for building a model.
+
+# A new model is created for each new day by looking back at the corresponding day in previous weeks.
+#
+# The model is used to represent normal behaviour so too large of a number would create an outdated
+# inaccurate model. Whereas, too small of a number would under represent the historical data
+# and could lead to including anomalies and unexpected behaviour in the model.
+#
+# Ex.
+# pipeline.events.analytics.host-1.historical-weeks-num = 8
+###################################################################################################
+# Name: pipeline.<config name>.analytics.<model name>.compare-interval-min
+# Required: No
+# Default: 5 minutes
+#
+# This specifies the time interval at which the new data is compared against the historical model
+# to check for anomalies. This must be larger than the <model name>.window-time-min
+# configuration. The default is set at 5 minutes.
+#
+# Ex.
+# pipeline.events.analytics.host-1.compare-interval-min = 5
+###################################################################################################
+# Name: pipeline.<config name>.analytics.<model name>.impala.delay-min
+# Required: No
+# Default: 6 minutes
+#
+# The artificial delay to allow complete metrics data to be written in Impala. This should be a
+# balance between lower latency and having complete data for detecting anomalies.
+#
+# Ex.
+# pipeline.events.analytics.host-1.impala.delay-min = 6
+###################################################################################################
+# Name: metrics.log-report-frequency
+# Required: Yes
+#
+# The frequency at which metrics are output to the consumer logs, in seconds. If this
+# value is 0, then there will not be any metrics output to the logs.
+#
+# Ex.
+metrics.log-report-frequency = 300
+###################################################################################################
+# Name: admin.server.bind-address
+# Required: No
+# Default: 0.0.0.0
+#
+# The IP or hostname to which the admin HTTP service should bind. If set to
+# 0.0.0.0 (wildcard), the server will to all available interfaces.
+#
+# Ex.
+# admin.server.bind-address = localhost
+#
+# Ex.
+# admin.server.bind-address = consumer1234.rocana.com
+###################################################################################################
+# Name: admin.server.port
+# Required: Yes
+# Default: 17315
+#
+# The port to which the admin HTTP service should bind.
+#
+# Ex.
+admin.server.port = 17315
+###################################################################################################

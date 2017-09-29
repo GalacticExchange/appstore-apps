@@ -1,0 +1,4 @@
+build:full[arg1]
+deploy:upload[arg1,arg2]
+export:tar[arg1]
+test:from_tar[arg1,arg2]

@@ -1,0 +1,7 @@
+.idea/
+*.tar
+*.tar.gz
+local-mode-cache
+
+
+/nodes

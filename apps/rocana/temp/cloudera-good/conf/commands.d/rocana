@@ -1,0 +1,7 @@
+#!/bin/sh
+
+command_type=sh
+
+command_sh_main() {
+  echo "To register an rocana command, see the documentation at: XXX"
+}

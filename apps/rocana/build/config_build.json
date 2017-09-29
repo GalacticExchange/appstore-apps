@@ -1,0 +1,23 @@
+{
+  "base": {
+    "base_image": "ubuntu-systemd",
+    "base_image_tag": "15.10",
+    "files_server": "51.0.1.6",
+    "command": "systemd"
+  },
+  "java": {
+    "install_flavor": "oracle",
+    "jdk_version": "7",
+    "oracle": {
+      "accept_oracle_download_terms": true
+    }
+  },
+  "mysql": {
+    "root_password": "PH_GEX_PASSWD1"
+  },
+  "cdh": {
+    "ip": "51.1.0.221",
+    "host": "51.1.0.221",
+    "zoookeper_quorum": "quickstart.cloudera:2181"
+  }
+}

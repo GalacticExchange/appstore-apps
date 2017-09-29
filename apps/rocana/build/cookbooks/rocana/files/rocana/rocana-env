@@ -1,0 +1,6 @@
+JAVA_HOME=/usr/lib/jvm/java-7-oracle-amd64
+
+ROCANA_HOME=/opt/rocana/rocana-1.4.2
+ROCANA_LIB_DIR=/opt/rocana/rocana-1.4.2/lib
+ROCANA_BIN_DIR=/opt/rocana/rocana-1.4.2/bin
+ROCANA_CONF_DIR=/opt/rocana/rocana-1.4.2/conf
